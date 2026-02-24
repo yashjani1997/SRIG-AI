@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SRIG — Civic Score Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --red:      #CC0000;
+    --red-dark: #990000;
+    --red-glow: #FF000033;
+    --white:    #FFFFFF;
+    --off-white:#F5F0F0;
+    --gray:     #1A1A1A;
+    --gray-mid: #2A2A2A;
+    --gray-light:#3A3A3A;
+    --border:   #CC000055;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--gray);
+    color: var(--white);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(90deg, #110000 0%, var(--gray) 100%);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-badge {
+    width: 52px; height: 52px;
+    background: var(--red);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 18px;
+    box-shadow: 0 0 20px var(--red-glow);
+    animation: pulse-badge 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%,100% { box-shadow: 0 0 20px var(--red-glow); }
+    50%      { box-shadow: 0 0 40px #FF000066; }
+  }
+
+  .logo-text h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 26px; font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--white);
+  }
+
+  .logo-text p {
+    font-size: 11px; letter-spacing: 3px;
+    color: var(--red); font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    text-align: right;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: #888;
+    line-height: 1.8;
+  }
+
+  .header-right .live {
+    color: #00FF88;
+    animation: blink 1.5s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    position: relative; z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  /* ── SECTION TITLES ── */
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 4px;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--red), transparent);
+  }
+
+  /* ── FORM PANEL ── */
+  .form-panel {
+    background: var(--gray-mid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .form-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red), transparent);
+  }
+
+  /* ── FORM GROUPS ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: #888;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  label .points {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: #111;
+    border: 1px solid #333;
+  }
+
+  label .points.pos { color: #00FF88; border-color: #00FF8844; }
+  label .points.neg { color: var(--red); border-color: var(--border); }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--gray-light);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--red);
+    border: 2px solid var(--white);
+    box-shadow: 0 0 8px var(--red-glow);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 16px #FF000066;
+  }
+
+  .range-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    color: var(--white);
+    font-weight: bold;
+    text-align: right;
+  }
+
+  .toggle-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #444;
+    background: transparent;
+    color: #888;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  .toggle-btn.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--white);
+    box-shadow: 0 0 12px var(--red-glow);
+  }
+
+  /* ── PREDICT BUTTON ── */
+  .predict-btn {
+    width: 100%;
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--red);
+    border: none;
+    color: var(--white);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+
+  .predict-btn:hover {
+    background: var(--red-dark);
+    box-shadow: 0 0 30px var(--red-glow);
+    transform: translateY(-1px);
+  }
+
+  .predict-btn:active { transform: translateY(0); }
+
+  .predict-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, #ffffff22, transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+
+  .predict-btn:hover::after { transform: translateX(100%); }
+
+  /* ── RESULT PANEL ── */
+  .result-panel {
+    background: var(--gray-mid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .result-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--red));
+  }
+
+  /* ── IDLE STATE ── */
+  .idle-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    opacity: 0.4;
+  }
+
+  .idle-state .hex {
+    width: 80px; height: 80px;
+    background: transparent;
+    border: 2px solid var(--red);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+  }
+
+  .idle-state p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #666;
+    text-align: center;
+  }
+
+  /* ── RESULT CONTENT ── */
+  .result-content { display: none; flex-direction: column; gap: 24px; }
+  .result-content.show { display: flex; animation: fadeIn 0.5s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Risk Badge */
+  .risk-badge {
+    text-align: center;
+    padding: 24px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .risk-badge .emoji { font-size: 48px; margin-bottom: 8px; display: block; }
+
+  .risk-badge .tier {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: 6px;
+  }
+
+  .risk-badge .confidence {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 4px;
+  }
+
+  /* Tier colors */
+  .tier-PLATINUM { background: linear-gradient(135deg, #0a1628, #1a2a4a); border: 1px solid #4FC3F7; }
+  .tier-PLATINUM .tier { color: #4FC3F7; text-shadow: 0 0 20px #4FC3F788; }
+
+  .tier-GOLD { background: linear-gradient(135deg, #1a1400, #2a2200); border: 1px solid #FFD700; }
+  .tier-GOLD .tier { color: #FFD700; text-shadow: 0 0 20px #FFD70088; }
+
+  .tier-SILVER { background: linear-gradient(135deg, #161616, #222); border: 1px solid #C0C0C0; }
+  .tier-SILVER .tier { color: #C0C0C0; text-shadow: 0 0 20px #C0C0C088; }
+
+  .tier-BRONZE { background: linear-gradient(135deg, #1a0e00, #2a1800); border: 1px solid #CD7F32; }
+  .tier-BRONZE .tier { color: #CD7F32; text-shadow: 0 0 20px #CD7F3288; }
+
+  .tier-HIGH_RISK { background: linear-gradient(135deg, #1a0000, #2a0000); border: 1px solid #FF4444; }
+  .tier-HIGH_RISK .tier { color: #FF4444; text-shadow: 0 0 20px #FF444488; }
+
+  /* Probability bars */
+  .prob-bars { display: flex; flex-direction: column; gap: 10px; }
+
+  .prob-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 45px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .prob-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: #888;
+  }
+
+  .prob-track {
+    height: 6px;
+    background: #111;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .prob-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .prob-pct {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    text-align: right;
+    color: #aaa;
+  }
+
+  /* Score breakdown */
+  .score-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .score-item {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+
+  .score-item .s-label { color: #666; font-size: 10px; letter-spacing: 1px; }
+  .score-item .s-val { font-family: 'Share Tech Mono', monospace; font-weight: bold; }
+  .score-item .s-val.pos { color: #00FF88; }
+  .score-item .s-val.neg { color: var(--red); }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid #222;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: #444;
+    letter-spacing: 2px;
+  }
+
+  footer span { color: var(--red); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    main { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    header { padding: 16px 20px; }
+    .header-right { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-badge">SR</div>
+    <div class="logo-text">
+      <h1>SRIG</h1>
+      <p>Smart Road India Grid</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div><span class="live">● </span>SYSTEM ONLINE</div>
+    <div>MODEL: TabTransformer v1.0</div>
+    <div>PILLAR 01 — CIVIC SCORE</div>
+    <div id="clock"></div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- LEFT: FORM -->
+  <div class="form-panel">
+    <div class="section-title">Driver Data Input</div>
+
+    <div class="form-grid">
+
+      <!-- Helmet Compliance -->
+      <div class="form-group">
+        <label>
+          Helmet Days
+          <span class="points pos">+10/day</span>
+        </label>
+        <input type="range" id="helmet" min="0" max="30" value="15"
+               oninput="updateVal('helmet-val', this.value); compute()"/>
+        <div class="range-val" id="helmet-val">15</div>
+      </div>
+
+      <!-- Signal Violations -->
+      <div class="form-group">
+        <label>
+          Signal Violations
+          <span class="points neg">-30 each</span>
+        </label>
+        <input type="range" id="signal" min="0" max="20" value="3"
+               oninput="updateVal('signal-val', this.value); compute()"/>
+        <div class="range-val" id="signal-val">3</div>
+      </div>
+
+      <!-- Speed Violations -->
+      <div class="form-group">
+        <label>
+          Speed Violations
+          <span class="points neg">-25 each</span>
+        </label>
+        <input type="range" id="speed" min="0" max="15" value="2"
+               oninput="updateVal('speed-val', this.value); compute()"/>
+        <div class="range-val" id="speed-val">2</div>
+      </div>
+
+      <!-- School Zone -->
+      <div class="form-group">
+        <label>
+          School Zone Viol.
+          <span class="points neg">-40 each</span>
+        </label>
+        <input type="range" id="school" min="0" max="10" value="0"
+               oninput="updateVal('school-val', this.value); compute()"/>
+        <div class="range-val" id="school-val">0</div>
+      </div>
+
+      <!-- Drunk Driving -->
+      <div class="form-group">
+        <label>
+          Drunk Driving
+          <span class="points neg">-100 each</span>
+        </label>
+        <input type="range" id="drunk" min="0" max="3" value="0"
+               oninput="updateVal('drunk-val', this.value); compute()"/>
+        <div class="range-val" id="drunk-val">0</div>
+      </div>
+
+      <!-- Accident History -->
+      <div class="form-group">
+        <label>
+          Accident History
+          <span class="points neg">-50 each</span>
+        </label>
+        <input type="range" id="accident" min="0" max="5" value="0"
+               oninput="updateVal('accident-val', this.value); compute()"/>
+        <div class="range-val" id="accident-val">0</div>
+      </div>
+
+      <!-- Years Driving -->
+      <div class="form-group">
+        <label>
+          Years Driving
+          <span class="points pos">+5/year</span>
+        </label>
+        <input type="range" id="years" min="1" max="40" value="10"
+               oninput="updateVal('years-val', this.value); compute()"/>
+        <div class="range-val" id="years-val">10</div>
+      </div>
+
+      <!-- Complaints -->
+      <div class="form-group">
+        <label>
+          Complaints Filed
+          <span class="points neg">-20 each</span>
+        </label>
+        <input type="range" id="complaints" min="0" max="10" value="0"
+               oninput="updateVal('complaints-val', this.value); compute()"/>
+        <div class="range-val" id="complaints-val">0</div>
+      </div>
+
+      <!-- Training -->
+      <div class="form-group">
+        <label>Training Completed <span class="points pos">+50</span></label>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="train-no"  onclick="setTraining(0)">NO</button>
+          <button class="toggle-btn active" id="train-yes" onclick="setTraining(1)">YES</button>
+        </div>
+      </div>
+
+      <!-- City Tier -->
+      <div class="form-group">
+        <label>City Tier</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="tier-1" onclick="setTier(1)">METRO</button>
+          <button class="toggle-btn" id="tier-2" onclick="setTier(2)">TIER 2</button>
+          <button class="toggle-btn" id="tier-3" onclick="setTier(3)">RURAL</button>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="predict-btn" onclick="predict()">
+      ▶ &nbsp; ANALYSE CIVIC SCORE
+    </button>
+  </div>
+
+  <!-- RIGHT: RESULT -->
+  <div class="result-panel">
+    <div class="section-title">Score Analysis</div>
+
+    <!-- Idle -->
+    <div class="idle-state" id="idle-state">
+      <div class="hex">🚦</div>
+      <p>AWAITING DRIVER DATA<br/>FILL FORM AND ANALYSE</p>
+    </div>
+
+    <!-- Result -->
+    <div class="result-content" id="result-content">
+
+      <!-- Risk Badge -->
+      <div class="risk-badge" id="risk-badge">
+        <span class="emoji" id="result-emoji"></span>
+        <div class="tier" id="result-tier"></div>
+        <div class="confidence" id="result-confidence"></div>
+      </div>
+
+      <!-- Probability Bars -->
+      <div>
+        <div class="section-title" style="margin-bottom:12px">Risk Probabilities</div>
+        <div class="prob-bars" id="prob-bars"></div>
+      </div>
+
+      <!-- Score Breakdown -->
+      <div>
+        <div class="section-title" style="margin-bottom:12px">Score Breakdown</div>
+        <div class="score-breakdown" id="score-breakdown"></div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  SRIG — SMART ROAD INDIA GRID &nbsp;|&nbsp;
+  <span>TABTRANSFORMER MODEL</span> &nbsp;|&nbsp;
+  YASH JANI &nbsp;|&nbsp; RED AND WHITE INSTITUTE, SURAT
+</footer>
+
+<script>
+  // ── State ──
+  let trainingCompleted = 1;
+  let cityTier = 1;
+
+  // ── Clock ──
+  function updateClock() {
+    document.getElementById('clock').textContent =
+      new Date().toLocaleTimeString('en-IN', {hour12: false});
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ── Helpers ──
+  function updateVal(id, val) {
+    document.getElementById(id).textContent = val;
+  }
+
+  function setTraining(val) {
+    trainingCompleted = val;
+    document.getElementById('train-yes').classList.toggle('active', val === 1);
+    document.getElementById('train-no').classList.toggle('active',  val === 0);
+    compute();
+  }
+
+  function setTier(val) {
+    cityTier = val;
+    [1,2,3].forEach(t => {
+      document.getElementById(`tier-${t}`).classList.toggle('active', t === val);
+    });
+    compute();
+  }
+
+  // ── Civic Score Calculation (mirrors Python model logic) ──
+  function getInputs() {
+    return {
+      helmet:    +document.getElementById('helmet').value,
+      signal:    +document.getElementById('signal').value,
+      speed:     +document.getElementById('speed').value,
+      school:    +document.getElementById('school').value,
+      drunk:     +document.getElementById('drunk').value,
+      accident:  +document.getElementById('accident').value,
+      years:     +document.getElementById('years').value,
+      complaints:+document.getElementById('complaints').value,
+      training:  trainingCompleted,
+      tier:      cityTier
+    };
+  }
+
+  function calcScore(d) {
+    let s = 500;
+    s += d.helmet     * 10;
+    s -= d.signal     * 30;
+    s -= d.speed      * 25;
+    s -= d.school     * 40;
+    s -= d.drunk      * 100;
+    s -= d.accident   * 50;
+    s += d.years      * 5;
+    s += d.training   * 50;
+    s -= d.complaints * 20;
+    s -= (d.tier - 1) * 30;
+    return Math.max(0, Math.min(1000, s));
+  }
+
+  function getRisk(score) {
+    if (score >= 900) return 'PLATINUM';
+    if (score >= 750) return 'GOLD';
+    if (score >= 600) return 'SILVER';
+    if (score >= 400) return 'BRONZE';
+    return 'HIGH_RISK';
+  }
+
+  // Softmax-like probabilities based on score
+  function getProbs(score) {
+    const tiers = {
+      PLATINUM: Math.max(0, score - 900) / 100,
+      GOLD:     score >= 750 ? Math.min(score-750, 150)/150 : 0,
+      SILVER:   score >= 600 ? Math.min(score-600, 150)/150 : 0,
+      BRONZE:   score >= 400 ? Math.min(score-400, 200)/200 : 0,
+      HIGH_RISK:Math.max(0, 400 - score) / 400
+    };
+
+    const risk = getRisk(score);
+    // Boost predicted class
+    tiers[risk] = Math.max(tiers[risk], 0.6);
+
+    // Normalize
+    const sum = Object.values(tiers).reduce((a,b) => a+b, 0);
+    Object.keys(tiers).forEach(k => tiers[k] = tiers[k] / sum);
+    return tiers;
+  }
+
+  const EMOJIS = {
+    PLATINUM:'💎', GOLD:'🥇', SILVER:'🥈', BRONZE:'🥉', HIGH_RISK:'⚠️'
+  };
+  const COLORS = {
+    PLATINUM:'#4FC3F7', GOLD:'#FFD700', SILVER:'#C0C0C0',
+    BRONZE:'#CD7F32',   HIGH_RISK:'#FF4444'
+  };
+
+  // ── Live compute on slider change ──
+  function compute() {
+    // Just update silently — full render on button click
+  }
+
+  // ── Main predict ──
+  function predict() {
+    const d     = getInputs();
+    const score = calcScore(d);
+    const risk  = getRisk(score);
+    const probs = getProbs(score);
+    const conf  = (probs[risk] * 100).toFixed(1);
+
+    // Show result panel
+    document.getElementById('idle-state').style.display    = 'none';
+    const rc = document.getElementById('result-content');
+    rc.classList.add('show');
+
+    // Risk badge
+    const badge = document.getElementById('risk-badge');
+    badge.className = `risk-badge tier-${risk}`;
+    document.getElementById('result-emoji').textContent      = EMOJIS[risk];
+    document.getElementById('result-tier').textContent       = risk.replace('_',' ');
+    document.getElementById('result-confidence').textContent =
+      `CONFIDENCE: ${conf}%  |  SCORE: ${score.toFixed(0)} / 1000`;
+
+    // Probability bars
+    const pbEl = document.getElementById('prob-bars');
+    pbEl.innerHTML = '';
+    Object.entries(probs).forEach(([tier, prob]) => {
+      const pct = (prob * 100).toFixed(1);
+      pbEl.innerHTML += `
+        <div class="prob-row">
+          <div class="prob-label">${tier.replace('_',' ')}</div>
+          <div class="prob-track">
+            <div class="prob-fill" id="fill-${tier}"
+                 style="background:${COLORS[tier]}"></div>
+          </div>
+          <div class="prob-pct">${pct}%</div>
+        </div>`;
+    });
+    // Animate bars after render
+    setTimeout(() => {
+      Object.entries(probs).forEach(([tier, prob]) => {
+        const el = document.getElementById(`fill-${tier}`);
+        if (el) el.style.width = (prob * 100) + '%';
+      });
+    }, 50);
+
+    // Score breakdown
+    const sb = document.getElementById('score-breakdown');
+    const breakdown = [
+      { label: 'Base Score',      val: 500,                    sign: 'pos' },
+      { label: 'Helmet',          val: d.helmet * 10,          sign: 'pos' },
+      { label: 'Signal Viol.',    val: -(d.signal * 30),       sign: d.signal   ? 'neg':'pos' },
+      { label: 'Speed Viol.',     val: -(d.speed * 25),        sign: d.speed    ? 'neg':'pos' },
+      { label: 'School Zone',     val: -(d.school * 40),       sign: d.school   ? 'neg':'pos' },
+      { label: 'Drunk Driving',   val: -(d.drunk * 100),       sign: d.drunk    ? 'neg':'pos' },
+      { label: 'Accidents',       val: -(d.accident * 50),     sign: d.accident ? 'neg':'pos' },
+      { label: 'Experience',      val: d.years * 5,            sign: 'pos' },
+      { label: 'Training',        val: d.training * 50,        sign: 'pos' },
+      { label: 'Complaints',      val: -(d.complaints * 20),   sign: d.complaints ? 'neg':'pos' },
+    ];
+    sb.innerHTML = breakdown.map(item => `
+      <div class="score-item">
+        <span class="s-label">${item.label}</span>
+        <span class="s-val ${item.sign}">${item.val >= 0 ? '+':''}${item.val}</span>
+      </div>`).join('');
+  }
+</script>
+</body>
+</html>
