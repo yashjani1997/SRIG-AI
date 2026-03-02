@@ -5,7 +5,7 @@
 [![Demo](https://img.shields.io/badge/🌐_Live_Demo-Click_Here-00ff88?style=for-the-badge)](https://YOUR_USERNAME.github.io/smarttraffic-ai)
 
 ## 🌐 Live Demo
-👉 **[Demo Page Open Karo](https://yashjani1997.github.io/smarttraffic-ai)**
+👉 **[Demo Page Open Karo](https://yashjani1997.github.io/SRIG-AI/)**
 
 ## 📌 Overview
 SmartTraffic AI ek two-model AI pipeline hai:
