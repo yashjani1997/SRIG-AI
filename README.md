@@ -2,7 +2,7 @@
 
 > Real-time Indian Traffic Detection & Congestion Forecasting System
 
-[![Demo](https://img.shields.io/badge/🌐_Live_Demo-Click_Here-00ff88?style=for-the-badge)](https://YOUR_USERNAME.github.io/smarttraffic-ai)
+[![Demo](https://img.shields.io/badge/🌐_Live_Demo-Click_Here-00ff88?style=for-the-badge)](https://srig-ai-paxofjsb6rfhj5rgb7hfof.streamlit.app/)
 
 ## 🌐 Live Demo
 👉 **[Demo Page Open Karo](https://yashjani1997.github.io/SRIG-AI/)**
