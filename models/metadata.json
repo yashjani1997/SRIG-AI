@@ -1,0 +1,44 @@
+{
+  "feature_cols": [
+    "total_vehicles",
+    "total_pcu",
+    "auto_rickshaw",
+    "bicycle",
+    "bus",
+    "car",
+    "motorbike",
+    "truck",
+    "person",
+    "hour_sin",
+    "hour_cos",
+    "day_sin",
+    "day_cos",
+    "pcu_roll5",
+    "pcu_roll10",
+    "pcu_diff"
+  ],
+  "target_col": "total_pcu",
+  "sequence_length": 60,
+  "mae": 25.683031977949266,
+  "rmse": 31.073179067007825,
+  "yolo_classes": [
+    "auto rickshaw",
+    "bicycle",
+    "bus",
+    "car",
+    "motorbike",
+    "truck",
+    "van",
+    "person"
+  ],
+  "pcu_values": {
+    "auto rickshaw": 1.2,
+    "bicycle": 0.5,
+    "bus": 3.0,
+    "car": 1.0,
+    "motorbike": 0.5,
+    "truck": 3.0,
+    "van": 1.5,
+    "person": 0.0
+  }
+}

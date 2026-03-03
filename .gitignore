@@ -16,3 +16,9 @@ venv/
 srig_env/
 src/data/
 data/
+src/models/
+src/runs/
+models/*.pt
+models/*.keras
+models/*.pkl
+src/data.zip
