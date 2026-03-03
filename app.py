@@ -147,12 +147,8 @@ def download_models_from_hf():
     all_present = all(os.path.exists(os.path.join(MODELS_DIR, f)) for f in files)
     if all_present:
         return
-    try:
-        from huggingface_hub import hf_hub_download
-    except ImportError:
-        os.system("pip install huggingface_hub -q")
-        from huggingface_hub import hf_hub_download
     import shutil
+    from huggingface_hub import hf_hub_download
     for fname in files:
         dest = os.path.join(MODELS_DIR, fname)
         if not os.path.exists(dest):
